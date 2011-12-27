@@ -1,0 +1,28 @@
+{
+  "name": "eventyoshi",
+  "description": "Allows several event emitters to be listened and emitted through a single one.",
+  "keywords": ["event", "emitter", "eventemitter", "router", "proxy"],
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/fent/node-eventyoshi.git"
+  },
+  "author": "fent (https://github.com/fent)",
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "engines": {
+    "node": "*"
+  },
+  "devDependencies": {
+    "mocha": "0.7.x"
+  },
+  "licenses": [ {
+    "type": "MIT",
+    "url" : "http://github.com/fent/node-eventyoshi/raw/master/LICENSE"
+  }]
+}
