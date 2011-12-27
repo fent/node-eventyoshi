@@ -32,7 +32,7 @@ ee1.on('foo', listener);
 ee2.on('foo', listener);
 ```
 
-Other than letting EventYoshi manage all events and listeners for you, it can be treated as another EventEmitter. You can pass it around without having to tell whoever you passed it to what emitters you're listening to and which you aren't listening to anymore.
+Well, you could do that, or you could let EventYoshi handle all the logic for you flawlessly and without modifying the underlying child event emitters. EventYoshi can be treated as another EventEmitter. You can pass it around without having to tell whoever you passed it to what emitters you're listening to and which you aren't listening to anymore.
 
 Same goes for events you might listen to or remove later. As you add more event emitters to event yoshi, it will add listeners that you were already listening for to the emitter you added.
 
@@ -69,15 +69,23 @@ Remove an event emitter from an event yoshi.
 
 ## Events
 
+When events are emitted, `this.child` will contain the child emitter the event came from. Or in case of `newListener` event, will contain the event yoshi itself.
+
+```js
+yoshi.on('event', function() {
+  console.log('Event came from: ', this.child);
+});
+```
+
 ### Event: 'newListener'
 `function (event, listener) { }`
 
 Emitted when a listener is added to an event yoshi.
 
 ### Event:  'newEmitterListener'
-`function (emitter, event, listener) { }`
+`function (event, listener) { }`
 
-Emitted when a listener is added to an event emitter that has been added to, and not removed from, an event yoshi.
+Emitted when a listener is added to an event emitter that has been added to, and not removed from, an event yoshi. Does not emit listeners added by EventYoshi.
 
 
 # Install

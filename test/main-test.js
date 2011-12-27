@@ -9,15 +9,17 @@ describe('Listen for an event', function() {
     , yoshi  = new EventYoshi()
                .add(ee1)
 
-  var lastFoo;
+  var lastFoo, lastFooChild;
   var foo = function(s) {
     lastFoo = s;
+    lastFooChild = this.child;
   };
   yoshi.on('foo', foo);
 
-  var lastCat;
+  var lastCat, lastCatChild;
   var cat = function(s) {
     lastCat = s;
+    lastCatChild = this.child;
   };
   yoshi.on('cat', cat);
 
@@ -25,24 +27,33 @@ describe('Listen for an event', function() {
   it('Emits event to eventyoshi from emitter', function() {
     ee1.emit('foo', 'bar');
     assert.equal(lastFoo, 'bar');
+    assert.equal(lastFooChild, ee1);
+
     ee1.emit('cat', 'doggy');
     assert.equal(lastCat, 'doggy');
+    assert.equal(lastCatChild, ee1);
   });
 
   describe('Add another event emitter', function() {
 
     it('Routes its events to yoshi', function() {
       yoshi.add(ee2);
+
       ee2.emit('foo', 'bar2');
       assert.equal(lastFoo, 'bar2');
+      assert.equal(lastFooChild, ee2);
+
       ee2.emit('cat', 'dog2');
       assert.equal(lastCat, 'dog2');
+      assert.equal(lastCatChild, ee2);
     });
 
     it('Does not emit events not listened to', function() {
       ee2.emit('nope', 'yes');
       assert.equal(lastFoo, 'bar2');
+      assert.equal(lastFooChild, ee2);
       assert.equal(lastCat, 'dog2');
+      assert.equal(lastCatChild, ee2);
     });
   });
 
@@ -52,11 +63,13 @@ describe('Listen for an event', function() {
       yoshi.removeListener('foo', foo);
       ee1.emit('foo', 'bar3');
       assert.equal(lastFoo, 'bar2');
+      assert.equal(lastFooChild, ee2);
     });
 
     it('Still emits other listened to events', function() {
       ee1.emit('cat', 'dog3');
       assert.equal(lastCat, 'dog3');
+      assert.equal(lastCatChild, ee1);
     });
 
     describe('Remove first event emitter', function() {
@@ -69,6 +82,7 @@ describe('Listen for an event', function() {
       it('Still routes events from second event emitter', function() {
         ee2.emit('cat', 'dog5');
         assert.equal(lastCat, 'dog5');
+      assert.equal(lastCatChild, ee2);
       });
     });
   });
@@ -85,6 +99,7 @@ describe('Listen for an event', function() {
     it('Old listeners are still called', function() {
       ee2.emit('cat', 'diggity');
       assert.equal(lastCat, 'diggity');
+      assert.equal(lastCatChild, ee2);
     });
 
     it('New listeners are called on new events', function() {
@@ -139,8 +154,9 @@ describe('Listen for `newListener` event', function() {
     , yoshi  = new EventYoshi()
                .add(ee1)
 
-  var lastEvent, lastListener;
+  var lastEmitter, lastEvent, lastListener;
   var newListener = function(event, listener) {
+    lastEmitter = this.child;
     lastEvent = event;
     lastListener = listener
   };
@@ -151,6 +167,7 @@ describe('Listen for `newListener` event', function() {
   describe('Add a new listener to yoshi', function() {
     it('Calls listener', function() {
       yoshi.on('what', f);
+      assert.equal(lastEmitter, yoshi);
       assert.equal(lastEvent, 'what');
       assert.equal(lastListener, f);
     });
@@ -159,6 +176,7 @@ describe('Listen for `newListener` event', function() {
   describe('Add a new listener to event emitter', function() {
     it('Does not call listener', function() {
       ee1.on('butt', function() {});
+      assert.equal(lastEmitter, yoshi);
       assert.equal(lastEvent, 'what');
       assert.equal(lastListener, f);
     });
@@ -169,6 +187,7 @@ describe('Listen for `newListener` event', function() {
       yoshi.removeListener('newListener', newListener);
 
       yoshi.on('nothing', function() {});
+      assert.equal(lastEmitter, yoshi);
       assert.equal(lastEvent, 'what');
       assert.equal(lastListener, f);
     });
@@ -178,12 +197,14 @@ describe('Listen for `newListener` event', function() {
 
 describe('Listener for `newEmitterListener` event', function() {
   var ee1 = new EventEmitter()
+    , ee2 = new EventEmitter()
     , yoshi  = new EventYoshi()
                .add(ee1)
+               .add(ee2)
 
   var lastEmitter, lastEvent, lastListener;
-  var newEmitterListener = function(ee, event, listener) {
-    lastEmitter = ee;
+  var newEmitterListener = function(event, listener) {
+    lastEmitter = this.child;
     lastEvent = event;
     lastListener = listener;
   };
@@ -200,7 +221,7 @@ describe('Listener for `newEmitterListener` event', function() {
   });
 
   describe('Add listener to child event emitter', function() {
-    if('Emits newEmitterListener', function() {
+    it('Emits newEmitterListener', function() {
       var f = function() {};
       ee1.on('bar', f);
       assert.equal(lastEmitter, ee1);
