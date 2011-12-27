@@ -82,7 +82,7 @@ yoshi.on('event', function() {
 
 Emitted when a listener is added to an event yoshi.
 
-### Event:  'newEmitterListener'
+### Event:  'newChildListener'
 `function (event, listener) { }`
 
 Emitted when a listener is added to an event emitter that has been added to, and not removed from, an event yoshi. Does not emit listeners added by EventYoshi.
