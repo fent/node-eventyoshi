@@ -2,7 +2,7 @@
 
 Allows several event emitters to be handled and emitting to a single one.
 
-![concept](https://github.com/fent/node-eventyoshi/raw/master/yoshi.png)
+![concept](https://github.com/fent/node-eventyoshi/raw/master/img/yoshi.png)
 
 # Usage
 
