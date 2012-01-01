@@ -66,6 +66,16 @@ Adds an event emitter to an event yoshi.
 ### yoshi.remove(emitter)
 Remove an event emitter from an event yoshi.
 
+### yoshi.proxy(fn)
+Proxies all calls from to `yoshi[fn]` to its children.
+
+```js
+yoshi.add(writeStream);
+yoshi.proxy('write');
+
+yoshi.write(data); // this will call writeStream.write with data
+```
+
 
 ## Events
 

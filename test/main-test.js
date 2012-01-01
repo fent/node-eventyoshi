@@ -288,3 +288,30 @@ describe('Emit on eventyoshi', function() {
     assert.equal(lastEE, 'b');
   });
 });
+
+
+describe('Proxy a custom function', function() {
+  var ee1 = new EventEmitter()
+    , ee2 = new EventEmitter()
+    , ee1foo, ee2foo
+    , yoshi  = new EventYoshi()
+               .add(ee1)
+               .add(ee2)
+
+
+    yoshi.proxy('foo');
+
+    ee1.foo = function() {
+      ee1foo = true;
+    };
+
+    ee2.foo = function(a, b) {
+      ee2foo = a + b;
+    };
+
+    it('Calls proxied child functions', function() {
+      yoshi.foo(2, 3);
+      assert.equal(ee1foo, true);
+      assert.equal(ee2foo, 5);
+    });
+});
