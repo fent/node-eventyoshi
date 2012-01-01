@@ -299,19 +299,27 @@ describe('Proxy a custom function', function() {
                .add(ee2)
 
 
-    yoshi.proxy('foo');
+    yoshi.proxy('foo', 'bar');
 
     ee1.foo = function() {
       ee1foo = true;
+      return 'a';
     };
 
     ee2.foo = function(a, b) {
       ee2foo = a + b;
+      return 'b';
+    };
+
+    ee2.bar = function(a) {
+      return a;
     };
 
     it('Calls proxied child functions', function() {
-      yoshi.foo(2, 3);
+      assert.deepEqual(yoshi.foo(2, 3), ['a', 'b']);
       assert.equal(ee1foo, true);
       assert.equal(ee2foo, 5);
+
+      assert.equal(yoshi.bar('hello'), 'hello');
     });
 });

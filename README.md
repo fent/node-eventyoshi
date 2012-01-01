@@ -67,13 +67,14 @@ Adds an event emitter to an event yoshi.
 Remove an event emitter from an event yoshi.
 
 ### yoshi.proxy(fn)
-Proxies all calls from to `yoshi[fn]` to its children.
+Proxies all calls from to `yoshi[fn]` to its children. Returns values returned from called functions in an array. If the array's length is only 1, returns only the first value;
 
 ```js
 yoshi.add(writeStream);
-yoshi.proxy('write');
+yoshi.proxy('write', 'end');
 
-yoshi.write(data); // this will call writeStream.write with data
+yoshi.write(data); // this will call writeStream.write() with data
+yoshi.end(); // will call writeStream.end()
 ```
 
 
