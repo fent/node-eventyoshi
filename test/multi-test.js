@@ -23,3 +23,40 @@ describe('Listen for an event more than once', function() {
     });
   });
 });
+
+
+describe('Listen first', function() {
+  var yoshi = new EventYoshi();
+  var ee1 = new EventEmitter();
+  var lastA;
+  var lastB
+  function a(s) {
+    lastA = s;
+  }
+
+  function b(s) {
+    lastB = s;
+  }
+
+  yoshi.on('foo', a);
+  yoshi.on('foo', b);
+
+  describe('then add a listener', function() {
+    it('Emits event on yoshi', function() {
+      yoshi.add(ee1);
+      ee1.emit('foo', 'bar');
+      assert.equal(lastA, 'bar');
+      assert.equal(lastB, 'bar');
+    });
+
+    describe('then remove and add another', function() {
+      it('Should call new listener on emit', function() {
+        yoshi.removeListener('foo', a);
+        ee1.emit('foo', 'fff');
+        assert.equal(lastA, 'bar');
+        assert.equal(lastB, 'fff');
+      });
+    });
+
+  });
+});
