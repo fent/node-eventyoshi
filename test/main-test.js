@@ -131,23 +131,6 @@ describe('Listen for an event', function() {
         assert.equal(lastCat, 'dogton');
       });
     });
-
-    /*
-     * does not work with node v0.4.x
-     * because `removeAllListeners()` must be called with an event name
-    describe('Remove all listeners', function() {
-      it('Does not call any listener', function() {
-        yoshi.removeAllListeners();
-
-        ee2.emit('hello', 'world3');
-        ee2.emit('cat', 'diddy');
-        ee2.emit('foo', 'boor');
-        assert.equal(lastFoo, 'world');
-        assert.equal(lastCat, 'dogton');
-        assert.equal(lastHello, 'world');
-      });
-    });
-    */
   });
 
 });
