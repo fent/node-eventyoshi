@@ -2,7 +2,7 @@
 
 Allows several event emitters to be handled and emitting to a single one.
 
-![concept](https://github.com/fent/node-eventyoshi/raw/master/img/yoshi.png)
+![concept](img/yoshi.png)
 
 [![Build Status](https://secure.travis-ci.org/fent/node-eventyoshi.svg)](http://travis-ci.org/fent/node-eventyoshi)
 [![Dependency Status](https://gemnasium.com/fent/node-eventyoshi.svg)](https://gemnasium.com/fent/node-eventyoshi)
