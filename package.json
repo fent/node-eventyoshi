@@ -8,7 +8,7 @@
     "router",
     "proxy"
   ],
-  "version": "0.1.7",
+  "version": "0.1.8",
   "repository": {
     "type": "git",
     "url": "git://github.com/fent/node-eventyoshi.git"
@@ -25,6 +25,8 @@
     "istanbul": "*",
     "mocha": "*"
   },
-  "engines": { "node": ">=0.12" },
+  "engines": {
+    "node": ">=0.12"
+  },
   "license": "MIT"
 }
