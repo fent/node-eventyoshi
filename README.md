@@ -112,7 +112,7 @@ Emitted when a listener is added to an event emitter that has been added to, and
 
 
 # Tests
-Tests are written with [mocha](http://visionmedia.github.com/mocha/)
+Tests are written with [mocha](https://mochajs.org)
 
 ```bash
 npm test
