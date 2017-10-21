@@ -11,16 +11,16 @@ Allows several event emitters to be handled and emitting to a single one.
 # Usage
 
 ```js
-var EventEmtter = require('events').EventEmitter
-  , EventYoshi = require('eventyoshi')
+const EventEmitter = require('events').EventEmitter;
+const EventYoshi = require('eventyoshi');
 
 var ee1 = new EventEmitter();
 var ee2 = new EventEmitter();
 var yoshi = new EventYoshi()
   .add(ee1)
-  .add(ee2)
+  .add(ee2);
 
-yoshi.on('foo', function() {
+yoshi.on('foo', () => {
   console.log('foo!');
 });
 ee1.emit('foo'); // foo!
@@ -42,7 +42,7 @@ Same goes for events you might listen to or remove later. As you add more event 
 
 ```js
 var yoshi = new EventYoshi();
-yoshi.on('a', function() {
+yoshi.on('a', () => {
   console.log('a emitted');
 });
 
@@ -52,7 +52,7 @@ yoshi.add(ee);
 ee.emit('a'); // a emitted
 ```
 
-And as you remove emitters, all listeners that were added through event yoshi are removed too.
+And as you remove emitters, all listeners that were added through event yoshi are removed.
 
 ```js
 yoshi.remove(ee);
@@ -88,7 +88,7 @@ When the proxy'd functions are called, they return the values returned from call
 When events are emitted, `this.child` will contain the child emitter the event came from. Or in case of `newListener` event, will contain the event yoshi itself.
 
 ```js
-yoshi.on('event', function() {
+yoshi.on('event', () => {
   console.log('Event came from: ', this.child);
 });
 ```

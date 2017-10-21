@@ -4,6 +4,6 @@
 // and taking some random time at it
 //
 
-setTimeout(function() {
+setTimeout(() => {
   process.send(Math.floor(Math.random() * 10001));
 }, Math.floor(Math.random() * 5000));

@@ -1,9 +1,9 @@
-var EventYoshi = require('..')
-  , EventEmitter = require('events').EventEmitter
-  , assert = require('assert')
+const EventYoshi   = require('..');
+const EventEmitter = require('events').EventEmitter;
+const assert       = require('assert');
 
 
-describe('Listen for an event more than once', function() {
+describe('Listen for an event more than once', () => {
   var yoshi = new EventYoshi();
   yoshi.add(new EventEmitter());
   yoshi.add(new EventEmitter());
@@ -12,24 +12,24 @@ describe('Listen for an event more than once', function() {
   yoshi.on('foo', a);
   yoshi.on('foo', b);
 
-  it('Should emit event only once when emitted', function(done) {
+  it('Should emit event only once when emitted', (done) => {
     yoshi.on('foo', done);
     yoshi.emit('foo');
   });
 
-  describe('remove a listener', function() {
-    it('Does not throw', function() {
+  describe('remove a listener', () => {
+    it('Does not throw', () => {
       yoshi.removeListener('foo', a);
     });
   });
 });
 
 
-describe('Listen first', function() {
+describe('Listen first', () => {
   var yoshi = new EventYoshi();
   var ee1 = new EventEmitter();
   var lastA;
-  var lastB
+  var lastB;
   function a(s) {
     lastA = s;
   }
@@ -41,16 +41,16 @@ describe('Listen first', function() {
   yoshi.on('foo', a);
   yoshi.on('foo', b);
 
-  describe('then add a listener', function() {
-    it('Emits event on yoshi', function() {
+  describe('then add a listener', () => {
+    it('Emits event on yoshi', () => {
       yoshi.add(ee1);
       ee1.emit('foo', 'bar');
       assert.equal(lastA, 'bar');
       assert.equal(lastB, 'bar');
     });
 
-    describe('then remove and add another', function() {
-      it('Should call new listener on emit', function() {
+    describe('then remove and add another', () => {
+      it('Should call new listener on emit', () => {
         yoshi.removeListener('foo', a);
         ee1.emit('foo', 'fff');
         assert.equal(lastA, 'bar');
