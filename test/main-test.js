@@ -4,24 +4,23 @@ const assert       = require('assert');
 
 
 describe('Listen for an event', () => {
-  var ee1   = new EventEmitter();
-  var ee2   = new EventEmitter();
-  var yoshi = new EventYoshi().add(ee1);
+  const ee1   = new EventEmitter();
+  const ee2   = new EventEmitter();
+  const yoshi = new EventYoshi().add(ee1);
 
-  var lastFoo, lastFooChild;
-  var foo = function(s) {
+  let lastFoo, lastFooChild;
+  const foo = function(s) {
     lastFoo = s;
     lastFooChild = this.child;
   };
   yoshi.on('foo', foo);
 
-  var lastCat, lastCatChild;
-  var cat = function(s) {
+  let lastCat, lastCatChild;
+  const cat = function(s) {
     lastCat = s;
     lastCatChild = this.child;
   };
   yoshi.on('cat', cat);
-
 
   it('Emits event to eventyoshi from emitter', () => {
     ee1.emit('foo', 'bar');
@@ -34,7 +33,6 @@ describe('Listen for an event', () => {
   });
 
   describe('Add another event emitter', () => {
-
     it('Routes its events to yoshi', () => {
       yoshi.add(ee2);
 
@@ -87,10 +85,8 @@ describe('Listen for an event', () => {
   });
 
   describe('Add more listeners', () => {
-    var lastHello;
-    var hello = (s) => {
-      lastHello = s;
-    };
+    let lastHello;
+    const hello = (s) => { lastHello = s; };
     yoshi.on('hello', hello);
     yoshi.on('hello', foo);
     yoshi.on('hello', cat);
@@ -136,18 +132,17 @@ describe('Listen for an event', () => {
 
 
 describe('Listen for `newListener` event', () => {
-  var ee1 = new EventEmitter();
-  var yoshi = new EventYoshi().add(ee1);
+  const ee1 = new EventEmitter();
+  const yoshi = new EventYoshi().add(ee1);
 
-  var lastEmitter, lastEvent, lastListener;
-  var newListener = function(event, listener) {
+  let lastEmitter, lastEvent, lastListener;
+  const newListener = function(event, listener) {
     lastEmitter = this.child;
     lastEvent = event;
     lastListener = listener;
   };
   yoshi.on('newListener', newListener);
-
-  var f = () => {};
+  const f = () => {};
 
   describe('Add a new listener to yoshi', () => {
     it('Calls listener', () => {
@@ -181,14 +176,14 @@ describe('Listen for `newListener` event', () => {
 
 
 describe('Listener for `newChildListener` event', () => {
-  var ee1 = new EventEmitter();
-  var ee2 = new EventEmitter();
-  var yoshi = new EventYoshi()
+  const ee1 = new EventEmitter();
+  const ee2 = new EventEmitter();
+  const yoshi = new EventYoshi()
     .add(ee1)
     .add(ee2);
 
-  var lastEmitter, lastEvent, lastListener;
-  var newChildListener = function(event, listener) {
+  let lastEmitter, lastEvent, lastListener;
+  const newChildListener = function(event, listener) {
     lastEmitter = this.child;
     lastEvent = event;
     lastListener = listener;
@@ -207,7 +202,7 @@ describe('Listener for `newChildListener` event', () => {
 
   describe('Add listener to child event emitter', () => {
     it('Emits newChildListener', () => {
-      var f = () => {};
+      const f = () => {};
       ee1.on('bar', f);
       assert.equal(lastEmitter, ee1);
       assert.equal(lastEvent, 'bar');
@@ -218,20 +213,17 @@ describe('Listener for `newChildListener` event', () => {
 
 
 describe('Listen once', () => {
-  var ee1 = new EventEmitter();
-  var yoshi = new EventYoshi().add(ee1);
+  const ee1 = new EventEmitter();
+  const yoshi = new EventYoshi().add(ee1);
 
-  var last;
-  var f = (s) => {
-    last = s;
-  };
+  let last;
+  const f = (s) => { last = s; };
   yoshi.once('soap', f);
 
   it('Calls listener just once', () => {
     ee1.emit('soap', 'a');
     ee1.emit('soap', 'b');
     ee1.emit('soap', 'c');
-
     assert.equal(last, 'a');
   });
 
@@ -248,17 +240,12 @@ describe('Listen once', () => {
 
 
 describe('Emit on eventyoshi', () => {
-  var ee1 = new EventEmitter();
-  var yoshi = new EventYoshi().add(ee1);
+  const ee1 = new EventEmitter();
+  const yoshi = new EventYoshi().add(ee1);
 
-  var lastYoshi, lastEE;
-  yoshi.on('a', (s) => {
-    lastYoshi = s;
-  });
-
-  ee1.on('a', (s) => {
-    lastEE = s;
-  });
+  let lastYoshi, lastEE;
+  yoshi.on('a', (s) => { lastYoshi = s; });
+  ee1.on('a', (s) => { lastEE = s; });
 
   it('Emits for both eventyoshi and child event emitters', () => {
     yoshi.emit('a', 'b');
@@ -270,16 +257,16 @@ describe('Emit on eventyoshi', () => {
 
 
 describe('Proxy a custom function', () => {
-  var ee1 = new EventEmitter();
-  var ee2 = new EventEmitter();
-  var ee1foo, ee2foo;
-  var yoshi = new EventYoshi()
+  const ee1 = new EventEmitter();
+  const ee2 = new EventEmitter();
+  const yoshi = new EventYoshi()
     .add(ee1)
     .add(ee2);
 
 
   yoshi.proxy('foo', 'bar');
 
+  let ee1foo, ee2foo;
   ee1.foo = () => {
     ee1foo = true;
     return 'a';

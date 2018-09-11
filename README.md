@@ -14,9 +14,9 @@ Allows several event emitters to be handled and emitting to a single one.
 const EventEmitter = require('events').EventEmitter;
 const EventYoshi = require('eventyoshi');
 
-var ee1 = new EventEmitter();
-var ee2 = new EventEmitter();
-var yoshi = new EventYoshi()
+let ee1 = new EventEmitter();
+let ee2 = new EventEmitter();
+let yoshi = new EventYoshi()
   .add(ee1)
   .add(ee2);
 
@@ -41,12 +41,12 @@ Well, you could do that, or you could let EventYoshi handle all the logic for yo
 Same goes for events you might listen to or remove later. As you add more event emitters to event yoshi, it will add listeners that you were already listening for to the emitter you added.
 
 ```js
-var yoshi = new EventYoshi();
+let yoshi = new EventYoshi();
 yoshi.on('a', () => {
   console.log('a emitted');
 });
 
-var ee = new EventEmitter();
+let ee = new EventEmitter();
 yoshi.add(ee);
 
 ee.emit('a'); // a emitted

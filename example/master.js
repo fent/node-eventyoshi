@@ -3,8 +3,8 @@ const yoshi = new(require('..'));
 
 
 // Spawn 5 workers
-var NUMBER = 5;
-for (var i = 0; i < NUMBER; i++) {
+const NUMBER = 5;
+for (let i = 0; i < NUMBER; i++) {
   yoshi.add(fork(__dirname + '/worker.js'));
 }
 

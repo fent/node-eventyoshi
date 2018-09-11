@@ -4,11 +4,11 @@ const assert       = require('assert');
 
 
 describe('Listen for an event more than once', () => {
-  var yoshi = new EventYoshi();
+  const yoshi = new EventYoshi();
   yoshi.add(new EventEmitter());
   yoshi.add(new EventEmitter());
-  function a() {}
-  function b() {}
+  const a = () => {};
+  const b = () => {};
   yoshi.on('foo', a);
   yoshi.on('foo', b);
 
@@ -26,18 +26,12 @@ describe('Listen for an event more than once', () => {
 
 
 describe('Listen first', () => {
-  var yoshi = new EventYoshi();
-  var ee1 = new EventEmitter();
-  var lastA;
-  var lastB;
-  function a(s) {
-    lastA = s;
-  }
-
-  function b(s) {
-    lastB = s;
-  }
-
+  const yoshi = new EventYoshi();
+  const ee1 = new EventEmitter();
+  let lastA;
+  let lastB;
+  const a = (s) => { lastA = s; };
+  const b = (s) => { lastB = s; } ;
   yoshi.on('foo', a);
   yoshi.on('foo', b);
 
