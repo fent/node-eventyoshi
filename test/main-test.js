@@ -9,16 +9,16 @@ describe('Listen for an event', () => {
   const yoshi = new EventYoshi().add(ee1);
 
   let lastFoo, lastFooChild;
-  const foo = function(s) {
+  const foo = (s) => {
     lastFoo = s;
-    lastFooChild = this.child;
+    lastFooChild = yoshi.child;
   };
   yoshi.on('foo', foo);
 
   let lastCat, lastCatChild;
-  const cat = function(s) {
+  const cat = (s) => {
     lastCat = s;
-    lastCatChild = this.child;
+    lastCatChild = yoshi.child;
   };
   yoshi.on('cat', cat);
 
@@ -136,8 +136,8 @@ describe('Listen for `newListener` event', () => {
   const yoshi = new EventYoshi().add(ee1);
 
   let lastEmitter, lastEvent, lastListener;
-  const newListener = function(event, listener) {
-    lastEmitter = this.child;
+  const newListener = (event, listener) => {
+    lastEmitter = yoshi.child;
     lastEvent = event;
     lastListener = listener;
   };
@@ -183,8 +183,8 @@ describe('Listener for `newChildListener` event', () => {
     .add(ee2);
 
   let lastEmitter, lastEvent, lastListener;
-  const newChildListener = function(event, listener) {
-    lastEmitter = this.child;
+  const newChildListener = (event, listener) => {
+    lastEmitter = yoshi.child;
     lastEvent = event;
     lastListener = listener;
   };

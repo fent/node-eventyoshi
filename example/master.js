@@ -10,7 +10,7 @@ for (let i = 0; i < NUMBER; i++) {
 
 
 // Wait to receive messages from workers
-yoshi.on('message', function(m) {
+yoshi.on('message', (m) => {
   console.log(m);
-  this.child.kill();
+  yoshi.child.kill();
 });

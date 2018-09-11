@@ -85,11 +85,11 @@ When the proxy'd functions are called, they return the values returned from call
 
 ## Events
 
-When events are emitted, `this.child` will contain the child emitter the event came from. Or in case of `newListener` event, will contain the event yoshi itself.
+When events are emitted, `yoshi.child` will contain the child emitter the event came from.
 
 ```js
 yoshi.on('event', () => {
-  console.log('Event came from: ', this.child);
+  console.log('Event came from: ', yoshi.child);
 });
 ```
 
