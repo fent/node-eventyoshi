@@ -300,7 +300,7 @@ describe('Listen once', () => {
     assert.ok(f.calledWith('a'));
   });
 
-  describe('And then removeListener', () => {
+  describe('Remove listener before emitting', () => {
     it('Does not call listener when emitted', () => {
       const ee1 = new EventEmitter();
       const yoshi = new EventYoshi().add(ee1);
