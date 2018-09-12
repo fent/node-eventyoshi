@@ -1,28 +1,28 @@
 const EventYoshi   = require('..');
 const EventEmitter = require('events').EventEmitter;
 const assert       = require('assert');
+const spy          = require('sinon').spy;
 
 
-describe('Listen for an event', () => {
-  const ee1   = new EventEmitter();
-  const ee2   = new EventEmitter();
-  const yoshi = new EventYoshi().add(ee1);
+describe('Add an emitter and listen for an event', () => {
+  it('Emits event to eventyoshi', () => {
+    const ee1 = new EventEmitter();
+    const yoshi = new EventYoshi().add(ee1);
 
-  let lastFoo, lastFooChild;
-  const foo = (s) => {
-    lastFoo = s;
-    lastFooChild = yoshi.child;
-  };
-  yoshi.on('foo', foo);
+    let lastFoo, lastFooChild;
+    const foo = (s) => {
+      lastFoo = s;
+      lastFooChild = yoshi.child;
+    };
+    yoshi.on('foo', foo);
 
-  let lastCat, lastCatChild;
-  const cat = (s) => {
-    lastCat = s;
-    lastCatChild = yoshi.child;
-  };
-  yoshi.on('cat', cat);
+    let lastCat, lastCatChild;
+    const cat = (s) => {
+      lastCat = s;
+      lastCatChild = yoshi.child;
+    };
+    yoshi.on('cat', cat);
 
-  it('Emits event to eventyoshi from emitter', () => {
     ee1.emit('foo', 'bar');
     assert.equal(lastFoo, 'bar');
     assert.equal(lastFooChild, ee1);
@@ -32,120 +32,112 @@ describe('Listen for an event', () => {
     assert.equal(lastCatChild, ee1);
   });
 
-  describe('Add another event emitter', () => {
-    it('Routes its events to yoshi', () => {
-      yoshi.add(ee2);
-
-      ee2.emit('foo', 'bar2');
-      assert.equal(lastFoo, 'bar2');
-      assert.equal(lastFooChild, ee2);
-
-      ee2.emit('cat', 'dog2');
-      assert.equal(lastCat, 'dog2');
-      assert.equal(lastCatChild, ee2);
-    });
-
-    it('Does not emit events not listened to', () => {
-      ee2.emit('nope', 'yes');
-      assert.equal(lastFoo, 'bar2');
-      assert.equal(lastFooChild, ee2);
-      assert.equal(lastCat, 'dog2');
-      assert.equal(lastCatChild, ee2);
-    });
+  it('Does not emit events not listened to', () => {
+    const ee1 = new EventEmitter();
+    const yoshi = new EventYoshi().add(ee1);
+    const foo = spy();
+    yoshi.on('foo', foo);
+    ee1.emit('nope', 'yes');
+    assert.ok(foo.notCalled);
   });
 
   describe('Remove listener', () => {
-
     it('Does not emit for those events anymore', () => {
+      const ee1 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1);
+      const foo = spy();
+      yoshi.on('foo', foo);
+      ee1.emit('foo', 'bar2');
+      assert.ok(foo.calledWith('bar2'));
       yoshi.removeListener('foo', foo);
       ee1.emit('foo', 'bar3');
-      assert.equal(lastFoo, 'bar2');
-      assert.equal(lastFooChild, ee2);
+      assert.ok(foo.calledWith('bar2'));
+      assert.equal(foo.callCount, 1);
     });
 
     it('Still emits other listened to events', () => {
-      ee1.emit('cat', 'dog3');
-      assert.equal(lastCat, 'dog3');
-      assert.equal(lastCatChild, ee1);
-    });
-
-    describe('Remove first event emitter', () => {
-      it('Does not route events to yoshi anymore', () => {
-        yoshi.remove(ee1);
-        ee1.emit('cat', 'dog4');
-        assert.equal(lastCat, 'dog3');
-      });
-
-      it('Still routes events from second event emitter', () => {
-        ee2.emit('cat', 'dog5');
-        assert.equal(lastCat, 'dog5');
-        assert.equal(lastCatChild, ee2);
-      });
+      const ee1 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1);
+      const foo = spy();
+      const cat = spy();
+      yoshi.on('foo', foo);
+      yoshi.on('cat', cat);
+      yoshi.removeListener('foo', foo);
+      ee1.emit('cat', 'dog');
+      assert.ok(cat.calledWith('dog'));
     });
   });
 
-  describe('Add more listeners', () => {
-    let lastHello;
-    const hello = (s) => { lastHello = s; };
-    yoshi.on('hello', hello);
-    yoshi.on('hello', foo);
-    yoshi.on('hello', cat);
-
-    it('Old listeners are still called', () => {
-      ee2.emit('cat', 'diggity');
-      assert.equal(lastCat, 'diggity');
-      assert.equal(lastCatChild, ee2);
+  describe('Remove event emitter', () => {
+    it('Does not route events to yoshi anymore', () => {
+      const ee1 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1);
+      const cat = spy();
+      yoshi.on('cat', cat);
+      yoshi.remove(ee1);
+      ee1.emit('cat', 'dog4');
+      assert.ok(cat.notCalled);
     });
 
-    it('New listeners are called on new events', () => {
-      ee2.emit('hello', 'world');
-      assert.equal(lastFoo, 'world');
-      assert.equal(lastCat, 'world');
-      assert.equal(lastHello, 'world');
-    });
-
-    it('Listeners are not called when other events emitted', () => {
-      ee2.emit('boy', 'meets world');
-      assert.equal(lastFoo, 'world');
-      assert.equal(lastCat, 'world');
-      assert.equal(lastHello, 'world');
-    });
-
-    describe('Remove all listeners specifying event', () => {
-      it('Does not call listeners for that event anymore', () => {
-        yoshi.removeAllListeners('hello');
-
-        ee2.emit('hello', 'world2');
-        assert.equal(lastFoo, 'world');
-        assert.equal(lastCat, 'world');
-        assert.equal(lastHello, 'world');
-      });
-
-      it('Still calls listeners for other events', () => {
-        ee2.emit('cat', 'dogton');
-        assert.equal(lastCat, 'dogton');
-      });
+    it('Still routes events from other event emitters', () => {
+      const ee1 = new EventEmitter();
+      const ee2 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1).add(ee2);
+      const cat = spy();
+      yoshi.on('cat', cat);
+      yoshi.remove(ee1);
+      ee2.emit('cat', 'dog4');
+      assert.ok(cat.calledWith('dog4'));
     });
   });
-
 });
 
+describe('Listen first, then add emitter', () => {
+  it('Emits event to eventyoshi', () => {
+    const ee1   = new EventEmitter();
+    const yoshi = new EventYoshi();
+
+    let lastFoo, lastFooChild;
+    const foo = (s) => {
+      lastFoo = s;
+      lastFooChild = yoshi.child;
+    };
+    yoshi.on('foo', foo);
+
+    let lastCat, lastCatChild;
+    const cat = (s) => {
+      lastCat = s;
+      lastCatChild = yoshi.child;
+    };
+    yoshi.on('cat', cat);
+
+    yoshi.add(ee1);
+
+    ee1.emit('foo', 'bar');
+    assert.equal(lastFoo, 'bar');
+    assert.equal(lastFooChild, ee1);
+
+    ee1.emit('cat', 'doggy');
+    assert.equal(lastCat, 'doggy');
+    assert.equal(lastCatChild, ee1);
+  });
+});
 
 describe('Listen for `newListener` event', () => {
-  const ee1 = new EventEmitter();
-  const yoshi = new EventYoshi().add(ee1);
-
-  let lastEmitter, lastEvent, lastListener;
-  const newListener = (event, listener) => {
-    lastEmitter = yoshi.child;
-    lastEvent = event;
-    lastListener = listener;
-  };
-  yoshi.on('newListener', newListener);
-  const f = () => {};
-
   describe('Add a new listener to yoshi', () => {
     it('Calls listener', () => {
+      const ee1 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1);
+
+      let lastEmitter, lastEvent, lastListener;
+      const newListener = (event, listener) => {
+        lastEmitter = yoshi.child;
+        lastEvent = event;
+        lastListener = listener;
+      };
+      yoshi.on('newListener', newListener);
+
+      const f = () => {};
       yoshi.on('what', f);
       assert.equal(lastEmitter, yoshi);
       assert.equal(lastEvent, 'what');
@@ -155,53 +147,55 @@ describe('Listen for `newListener` event', () => {
 
   describe('Add a new listener to event emitter', () => {
     it('Does not call listener', () => {
+      const ee1 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1);
+      const newListener = spy();
+      yoshi.on('newListener', newListener);
       ee1.on('butt', () => {});
-      assert.equal(lastEmitter, yoshi);
-      assert.equal(lastEvent, 'what');
-      assert.equal(lastListener, f);
+      assert.ok(newListener.notCalled);
     });
   });
 
   describe('Remove `newListener` listener', () => {
     it('Does not call listener anymore', () => {
+      const ee1 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1);
+      const newListener = spy();
+      yoshi.on('newListener', newListener);
       yoshi.removeListener('newListener', newListener);
-
       yoshi.on('nothing', () => {});
-      assert.equal(lastEmitter, yoshi);
-      assert.equal(lastEvent, 'what');
-      assert.equal(lastListener, f);
+      assert.ok(newListener.notCalled);
     });
   });
 });
 
-
 describe('Listener for `newChildListener` event', () => {
-  const ee1 = new EventEmitter();
-  const ee2 = new EventEmitter();
-  const yoshi = new EventYoshi()
-    .add(ee1)
-    .add(ee2);
-
-  let lastEmitter, lastEvent, lastListener;
-  const newChildListener = (event, listener) => {
-    lastEmitter = yoshi.child;
-    lastEvent = event;
-    lastListener = listener;
-  };
-  
-  yoshi.on('newChildListener', newChildListener);
-
   describe('Add listener to yoshi', () => {
-    it('Does not emit newChildListener', () => {
+    it('Does not emit `newChildListener`', () => {
+      const ee1 = new EventEmitter();
+      const ee2 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1).add(ee2);
+      const newChildListener = spy();
+      yoshi.on('newChildListener', newChildListener);
       yoshi.on('foo', () => {});
-      assert.ok(!lastEmitter);
-      assert.ok(!lastEvent);
-      assert.ok(!lastListener);
+      assert.ok(newChildListener.notCalled);
     });
   });
 
   describe('Add listener to child event emitter', () => {
-    it('Emits newChildListener', () => {
+    it('Emits `newChildListener`', () => {
+      const ee1 = new EventEmitter();
+      const ee2 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1).add(ee2);
+
+      let lastEmitter, lastEvent, lastListener;
+      const newChildListener = (event, listener) => {
+        lastEmitter = yoshi.child;
+        lastEvent = event;
+        lastListener = listener;
+      };
+
+      yoshi.on('newChildListener', newChildListener);
       const f = () => {};
       ee1.on('bar', f);
       assert.equal(lastEmitter, ee1);
@@ -209,83 +203,156 @@ describe('Listener for `newChildListener` event', () => {
       assert.equal(lastListener, f);
     });
   });
-});
 
-
-describe('Listen once', () => {
-  const ee1 = new EventEmitter();
-  const yoshi = new EventYoshi().add(ee1);
-
-  let last;
-  const f = (s) => { last = s; };
-  yoshi.once('soap', f);
-
-  it('Calls listener just once', () => {
-    ee1.emit('soap', 'a');
-    ee1.emit('soap', 'b');
-    ee1.emit('soap', 'c');
-    assert.equal(last, 'a');
-  });
-
-  describe('and then removeListener', () => {
-    it('Does not call listener when emitted', () => {
-      yoshi.once('bar', f);
-      yoshi.removeListener('bar', f);
-
-      ee1.emit('bar', 1);
-      assert.equal(last, 'a');
+  describe('Remove `newChildListener` listener', () => {
+    it('Does not call listener anymore', () => {
+      const ee1 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1);
+      const newChildListener = spy();
+      yoshi.on('newChildListener', newChildListener);
+      yoshi.removeAllListeners('newChildListener', newChildListener);
+      yoshi.on('nothing', () => {});
+      assert.ok(newChildListener.notCalled);
     });
   });
 });
 
+describe('Listen once', () => {
+  it('Calls listener just once', () => {
+    const ee1 = new EventEmitter();
+    const yoshi = new EventYoshi().add(ee1);
+    const f = spy();
+    yoshi.once('soap', f);
+    ee1.emit('soap', 'a');
+    ee1.emit('soap', 'b');
+    ee1.emit('soap', 'c');
+    assert.equal(f.callCount, 1);
+    assert.ok(f.calledWith('a'));
+  });
 
-describe('Emit on eventyoshi', () => {
-  const ee1 = new EventEmitter();
-  const yoshi = new EventYoshi().add(ee1);
-
-  let lastYoshi, lastEE;
-  yoshi.on('a', (s) => { lastYoshi = s; });
-  ee1.on('a', (s) => { lastEE = s; });
-
-  it('Emits for both eventyoshi and child event emitters', () => {
-    yoshi.emit('a', 'b');
-
-    assert.equal(lastYoshi, 'b');
-    assert.equal(lastEE, 'b');
+  describe('and then removeListener', () => {
+    it('Does not call listener when emitted', () => {
+      const ee1 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1);
+      const f = spy();
+      yoshi.once('bar', f);
+      yoshi.removeListener('bar', f);
+      ee1.emit('bar', 1);
+      assert.ok(f.notCalled);
+    });
   });
 });
 
+describe('Emit on eventyoshi', () => {
+  it('Emits for both eventyoshi and child event emitters', () => {
+    const ee1 = new EventEmitter();
+    const yoshi = new EventYoshi().add(ee1);
+    const parent = spy();
+    const child = spy();
+    yoshi.on('a', parent);
+    ee1.on('a', child);
+    yoshi.emit('a', 'b');
+    assert.ok(parent.called);
+    assert.ok(child.called);
+  });
+
+  it('Does not emit for child after removing', () => {
+    const ee1 = new EventEmitter();
+    const yoshi = new EventYoshi().add(ee1);
+    const parent = spy();
+    const child = spy();
+    yoshi.on('a', parent);
+    ee1.on('a', child);
+    yoshi.remove(ee1);
+    yoshi.emit('a', 'b');
+    assert.ok(parent.called);
+    assert.ok(child.notCalled);
+  });
+});
+
+describe('Listen for an event more than once', () => {
+  it('Should emit event once per listener when emitted', (done) => {
+    const yoshi = new EventYoshi();
+    yoshi.add(new EventEmitter());
+    yoshi.add(new EventEmitter());
+    yoshi.setMaxListeners(3);
+    const b = () => {};
+    yoshi.on('foo', () => {});
+    yoshi.on('foo', b);
+    yoshi.removeListener('foo', b);
+    yoshi.on('foo', done);
+    yoshi.emit('foo');
+  });
+});
 
 describe('Proxy a custom function', () => {
-  const ee1 = new EventEmitter();
-  const ee2 = new EventEmitter();
-  const yoshi = new EventYoshi()
-    .add(ee1)
-    .add(ee2);
-
-
-  yoshi.proxy('foo', 'bar');
-
-  let ee1foo, ee2foo;
-  ee1.foo = () => {
-    ee1foo = true;
-    return 'a';
-  };
-
-  ee2.foo = (a, b) => {
-    ee2foo = a + b;
-    return 'b';
-  };
-
-  ee2.bar = (a) => {
-    return a;
-  };
-
   it('Calls proxied child functions', () => {
+    const ee1 = new EventEmitter();
+    const ee2 = new EventEmitter();
+    const yoshi = new EventYoshi()
+      .add(ee1)
+      .add(ee2);
+
+
+    yoshi.proxy('foo', 'bar');
+
+    let ee1foo, ee2foo;
+    ee1.foo = () => {
+      ee1foo = true;
+      return 'a';
+    };
+
+    ee2.foo = (a, b) => {
+      ee2foo = a + b;
+      return 'b';
+    };
+
+    ee2.bar = (a) => {
+      return a;
+    };
+
     assert.deepEqual(yoshi.foo(2, 3), ['a', 'b']);
     assert.equal(ee1foo, true);
     assert.equal(ee2foo, 5);
 
     assert.equal(yoshi.bar('hello'), 'hello');
+  });
+});
+
+describe('Add the same emitter twice', () => {
+  it('Emits event only once', () => {
+    const ee1 = new EventEmitter();
+    const yoshi = new EventYoshi().add(ee1).add(ee1);
+    const f = spy();
+    yoshi.on('hello', f);
+    yoshi.emit('hello', 'to u');
+    yoshi.remove(ee1).remove(ee1);
+    assert.ok(f.calledOnce);
+  });
+});
+
+describe('Remove all events from yoshi', () => {
+  it('Does not emit event anymore from child emitters', () => {
+    const ee1 = new EventEmitter();
+    const yoshi = new EventYoshi().add(ee1);
+    const parent = spy();
+    yoshi.on('foo', parent);
+    yoshi.removeAllListeners('foo');
+    yoshi.removeAllListeners('bar');
+    ee1.emit('foo', 42);
+    assert.ok(parent.notCalled);
+  });
+
+  it('Still emits events to children', () => {
+    const ee1 = new EventEmitter();
+    const yoshi = new EventYoshi().add(ee1);
+    const parent = spy();
+    const child = spy();
+    yoshi.on('foo', parent);
+    ee1.on('foo', child);
+    yoshi.removeAllListeners();
+    ee1.emit('foo', 42);
+    assert.ok(parent.notCalled);
+    assert.ok(child.called);
   });
 });
