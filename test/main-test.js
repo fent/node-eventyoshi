@@ -60,9 +60,9 @@ describe('Add an emitter and listen for an event', () => {
       const yoshi = new EventYoshi().add(ee1);
       const foo = spy();
       const cat = spy();
-      yoshi.on('foo', foo);
-      yoshi.on('cat', cat);
-      yoshi.removeListener('foo', foo);
+      yoshi.addListener('foo', foo);
+      yoshi.addListener('cat', cat);
+      yoshi.off('foo', foo);
       ee1.emit('cat', 'dog');
       assert.ok(cat.calledWith('dog'));
     });
