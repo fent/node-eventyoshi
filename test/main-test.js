@@ -356,3 +356,33 @@ describe('Remove all events from yoshi', () => {
     assert.ok(child.called);
   });
 });
+
+describe('Use `EventEmitter#prependListener()`', () => {
+  it('Emits listeners in correct order', () => {
+    const ee1 = new EventEmitter();
+    const yoshi = new EventYoshi().add(ee1);
+    const a = spy();
+    const b = spy();
+    yoshi.prependListener('heart', b);
+    yoshi.prependListener('heart', a);
+    ee1.emit('heart');
+    assert.ok(a.called);
+    assert.ok(b.called);
+    assert.ok(a.calledBefore(b));
+  });
+});
+
+describe('Use `EventEmitter#prependOnceListener()`', () => {
+  it('Emits listeners in correct order', () => {
+    const ee1 = new EventEmitter();
+    const yoshi = new EventYoshi().add(ee1);
+    const a = spy();
+    const b = spy();
+    yoshi.prependOnceListener('heart', b);
+    yoshi.prependOnceListener('heart', a);
+    ee1.emit('heart');
+    assert.ok(a.called);
+    assert.ok(b.called);
+    assert.ok(a.calledBefore(b));
+  });
+});
