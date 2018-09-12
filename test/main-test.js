@@ -244,7 +244,7 @@ describe('Listen for `removeListener` event', () => {
       const f = spy();
       yoshi.on('removeListener', f);
       ee1.on('butt', () => {});
-      ee1.off('butt', () => {});
+      ee1.removeListener('butt', () => {});
       assert.ok(f.notCalled);
     });
   });
@@ -279,7 +279,7 @@ describe('Listener for `removeChildListener` event', () => {
 
       const f = () => {};
       ee1.on('bar', f);
-      ee1.off('bar', f);
+      ee1.removeListener('bar', f);
       assert.equal(lastEmitter, ee1);
       assert.equal(lastEvent, 'bar');
       assert.equal(lastListener, f);
