@@ -130,12 +130,11 @@ describe('Listen for `newListener` event', () => {
       const yoshi = new EventYoshi().add(ee1);
 
       let lastEmitter, lastEvent, lastListener;
-      const newListener = (event, listener) => {
+      yoshi.on('newListener', (event, listener) => {
         lastEmitter = yoshi.child;
         lastEvent = event;
         lastListener = listener;
-      };
-      yoshi.on('newListener', newListener);
+      });
 
       const f = () => {};
       yoshi.on('what', f);
@@ -149,10 +148,10 @@ describe('Listen for `newListener` event', () => {
     it('Does not call listener', () => {
       const ee1 = new EventEmitter();
       const yoshi = new EventYoshi().add(ee1);
-      const newListener = spy();
-      yoshi.on('newListener', newListener);
+      const f = spy();
+      yoshi.on('newListener', f);
       ee1.on('butt', () => {});
-      assert.ok(newListener.notCalled);
+      assert.ok(f.notCalled);
     });
   });
 
@@ -160,11 +159,11 @@ describe('Listen for `newListener` event', () => {
     it('Does not call listener anymore', () => {
       const ee1 = new EventEmitter();
       const yoshi = new EventYoshi().add(ee1);
-      const newListener = spy();
-      yoshi.on('newListener', newListener);
-      yoshi.removeListener('newListener', newListener);
+      const f = spy();
+      yoshi.on('newListener', f);
+      yoshi.removeListener('newListener', f);
       yoshi.on('nothing', () => {});
-      assert.ok(newListener.notCalled);
+      assert.ok(f.notCalled);
     });
   });
 });
@@ -175,10 +174,10 @@ describe('Listener for `newChildListener` event', () => {
       const ee1 = new EventEmitter();
       const ee2 = new EventEmitter();
       const yoshi = new EventYoshi().add(ee1).add(ee2);
-      const newChildListener = spy();
-      yoshi.on('newChildListener', newChildListener);
+      const f = spy();
+      yoshi.on('newChildListener', f);
       yoshi.on('foo', () => {});
-      assert.ok(newChildListener.notCalled);
+      assert.ok(f.notCalled);
     });
   });
 
@@ -189,13 +188,12 @@ describe('Listener for `newChildListener` event', () => {
       const yoshi = new EventYoshi().add(ee1).add(ee2);
 
       let lastEmitter, lastEvent, lastListener;
-      const newChildListener = (event, listener) => {
+      yoshi.on('newChildListener', (event, listener) => {
         lastEmitter = yoshi.child;
         lastEvent = event;
         lastListener = listener;
-      };
+      });
 
-      yoshi.on('newChildListener', newChildListener);
       const f = () => {};
       ee1.on('bar', f);
       assert.equal(lastEmitter, ee1);
@@ -208,11 +206,83 @@ describe('Listener for `newChildListener` event', () => {
     it('Does not call listener anymore', () => {
       const ee1 = new EventEmitter();
       const yoshi = new EventYoshi().add(ee1);
-      const newChildListener = spy();
-      yoshi.on('newChildListener', newChildListener);
-      yoshi.removeAllListeners('newChildListener', newChildListener);
+      const f = spy();
+      yoshi.on('newChildListener', f);
+      yoshi.removeAllListeners('newChildListener', f);
       yoshi.on('nothing', () => {});
-      assert.ok(newChildListener.notCalled);
+      assert.ok(f.notCalled);
+    });
+  });
+});
+
+describe('Listen for `removeListener` event', () => {
+  describe('Remove a listener from yoshi', () => {
+    it('Calls listener', () => {
+      const ee1 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1);
+
+      let lastEmitter, lastEvent, lastListener;
+      yoshi.on('removeListener', (event, listener) => {
+        lastEmitter = yoshi.child;
+        lastEvent = event;
+        lastListener = listener;
+      });
+
+      const f = () => {};
+      yoshi.on('what', f);
+      yoshi.off('what', f);
+      assert.equal(lastEmitter, yoshi);
+      assert.equal(lastEvent, 'what');
+      assert.equal(lastListener, f);
+    });
+  });
+
+  describe('Remove a listener from event emitter', () => {
+    it('Does not call listener', () => {
+      const ee1 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1);
+      const f = spy();
+      yoshi.on('removeListener', f);
+      ee1.on('butt', () => {});
+      ee1.off('butt', () => {});
+      assert.ok(f.notCalled);
+    });
+  });
+});
+
+describe('Listener for `removeChildListener` event', () => {
+  describe('Remove listener from yoshi', () => {
+    it('Does not emit `removeChildListener`', () => {
+      const ee1 = new EventEmitter();
+      const ee2 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1).add(ee2);
+      const f = spy();
+      yoshi.on('removeChildListener', f);
+      yoshi.on('foo', () => {});
+      yoshi.off('foo', () => {});
+      assert.ok(f.notCalled);
+    });
+  });
+
+  describe('Remove listener from child event emitter', () => {
+    it('Emits `removeChildListener`', () => {
+      const ee1 = new EventEmitter();
+      const ee2 = new EventEmitter();
+      const yoshi = new EventYoshi().add(ee1).add(ee2);
+
+      let lastEmitter, lastEvent, lastListener;
+      yoshi.on('removeChildListener', (event, listener) => {
+        lastEmitter = yoshi.child;
+        lastEvent = event;
+        lastListener = listener;
+      });
+
+      const f = () => {};
+      ee1.on('bar', f);
+      ee1.off('bar', f);
+      assert.equal(lastEmitter, ee1);
+      assert.equal(lastEvent, 'bar');
+      assert.equal(lastListener, f);
     });
   });
 });
@@ -230,7 +300,7 @@ describe('Listen once', () => {
     assert.ok(f.calledWith('a'));
   });
 
-  describe('and then removeListener', () => {
+  describe('And then removeListener', () => {
     it('Does not call listener when emitted', () => {
       const ee1 = new EventEmitter();
       const yoshi = new EventYoshi().add(ee1);

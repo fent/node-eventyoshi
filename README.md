@@ -93,17 +93,17 @@ yoshi.on('event', () => {
 });
 ```
 
-### Event: 'newListener'
-* `string` - Event.
-* `Function` - Listener.
-
-Emitted when a listener is added to an event yoshi.
-
 ### Event:  'newChildListener'
 * `string` - Event.
 * `Function` - Listener.
 
-Emitted when a listener is added to an event emitter that has been added to, and not removed from, an event yoshi. Does not emit listeners added by EventYoshi.
+Emitted when a listener is added to a child event emitter. Does not emit listeners added by EventYoshi.
+
+### Event: 'removeChildListener'
+* `string` - Event.
+* `Function` - Listener.
+
+Emitted when a listener is removed from a child event emitter. Does not emit listeners added by EventYoshi.
 
 
 # Install
