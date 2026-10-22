@@ -4,8 +4,8 @@ Allows several event emitters to be handled and emitting to a single one.
 
 ![concept](img/yoshi.png)
 
-[![Build Status](https://secure.travis-ci.org/fent/node-eventyoshi.svg)](http://travis-ci.org/fent/node-eventyoshi)
-![Depfu](https://img.shields.io/depfu/fent/node-eventyoshi)
+[![npm](https://img.shields.io/npm/v/eventyoshi)](https://www.npmjs.com/package/eventyoshi)
+[![Node.js CI](https://github.com/fent/node-eventyoshi/actions/workflows/nodejs.yml/badge.svg)](https://github.com/fent/node-eventyoshi/actions/workflows/nodejs.yml)
 [![codecov](https://codecov.io/gh/fent/node-eventyoshi/branch/master/graph/badge.svg)](https://codecov.io/gh/fent/node-eventyoshi)
 
 # Usage
