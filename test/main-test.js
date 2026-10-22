@@ -1,8 +1,7 @@
-const EventYoshi   = require('..');
-const EventEmitter = require('events').EventEmitter;
-const assert       = require('assert');
-const spy          = require('sinon').spy;
-
+const EventYoshi = require('..');
+const EventEmitter = require('node:events').EventEmitter;
+const assert = require('node:assert');
+const spy = require('sinon').spy;
 
 describe('Add an emitter and listen for an event', () => {
   it('Emits event to eventyoshi', () => {
@@ -94,7 +93,7 @@ describe('Add an emitter and listen for an event', () => {
 
 describe('Listen first, then add emitter', () => {
   it('Emits event to eventyoshi', () => {
-    const ee1   = new EventEmitter();
+    const ee1 = new EventEmitter();
     const yoshi = new EventYoshi();
 
     let lastFoo, lastFooChild;
@@ -359,10 +358,7 @@ describe('Proxy a custom function', () => {
   it('Calls proxied child functions', () => {
     const ee1 = new EventEmitter();
     const ee2 = new EventEmitter();
-    const yoshi = new EventYoshi()
-      .add(ee1)
-      .add(ee2);
-
+    const yoshi = new EventYoshi().add(ee1).add(ee2);
 
     yoshi.proxy('foo', 'bar');
 
