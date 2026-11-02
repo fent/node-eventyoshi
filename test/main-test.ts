@@ -1,22 +1,50 @@
-const EventYoshi = require('..');
-const EventEmitter = require('node:events').EventEmitter;
-const assert = require('node:assert');
-const spy = require('sinon').spy;
+import assert from 'node:assert';
+import { EventEmitter } from 'node:events';
+import { spy } from 'sinon';
+import EventYoshi from '../src';
+
+const captureListenerEvent = (
+  yoshi: EventYoshi,
+  eventName:
+    | 'newListener'
+    | 'newChildListener'
+    | 'removeListener'
+    | 'removeChildListener',
+) => {
+  const captured: {
+    emitter: unknown;
+    event: unknown;
+    listener: unknown;
+  } = { emitter: undefined, event: undefined, listener: undefined };
+
+  yoshi.on(
+    eventName,
+    (event: string | symbol, listener: EventYoshi.EventListener) => {
+      captured.emitter = yoshi.child;
+      captured.event = event;
+      captured.listener = listener;
+    },
+  );
+
+  return captured;
+};
 
 describe('Add an emitter and listen for an event', () => {
   it('Emits event to eventyoshi', () => {
     const ee1 = new EventEmitter();
     const yoshi = new EventYoshi().add(ee1);
 
-    let lastFoo, lastFooChild;
-    const foo = (s) => {
+    let lastFoo: unknown;
+    let lastFooChild: unknown;
+    const foo = (s: unknown) => {
       lastFoo = s;
       lastFooChild = yoshi.child;
     };
     yoshi.on('foo', foo);
 
-    let lastCat, lastCatChild;
-    const cat = (s) => {
+    let lastCat: unknown;
+    let lastCatChild: unknown;
+    const cat = (s: unknown) => {
       lastCat = s;
       lastCatChild = yoshi.child;
     };
@@ -96,15 +124,17 @@ describe('Listen first, then add emitter', () => {
     const ee1 = new EventEmitter();
     const yoshi = new EventYoshi();
 
-    let lastFoo, lastFooChild;
-    const foo = (s) => {
+    let lastFoo: unknown;
+    let lastFooChild: unknown;
+    const foo = (s: unknown) => {
       lastFoo = s;
       lastFooChild = yoshi.child;
     };
     yoshi.on('foo', foo);
 
-    let lastCat, lastCatChild;
-    const cat = (s) => {
+    let lastCat: unknown;
+    let lastCatChild: unknown;
+    const cat = (s: unknown) => {
       lastCat = s;
       lastCatChild = yoshi.child;
     };
@@ -127,19 +157,13 @@ describe('Listen for `newListener` event', () => {
     it('Calls listener', () => {
       const ee1 = new EventEmitter();
       const yoshi = new EventYoshi().add(ee1);
-
-      let lastEmitter, lastEvent, lastListener;
-      yoshi.on('newListener', (event, listener) => {
-        lastEmitter = yoshi.child;
-        lastEvent = event;
-        lastListener = listener;
-      });
+      const captured = captureListenerEvent(yoshi, 'newListener');
 
       const f = () => {};
       yoshi.on('what', f);
-      assert.equal(lastEmitter, yoshi);
-      assert.equal(lastEvent, 'what');
-      assert.equal(lastListener, f);
+      assert.equal(captured.emitter, yoshi);
+      assert.equal(captured.event, 'what');
+      assert.equal(captured.listener, f);
     });
   });
 
@@ -185,19 +209,13 @@ describe('Listener for `newChildListener` event', () => {
       const ee1 = new EventEmitter();
       const ee2 = new EventEmitter();
       const yoshi = new EventYoshi().add(ee1).add(ee2);
-
-      let lastEmitter, lastEvent, lastListener;
-      yoshi.on('newChildListener', (event, listener) => {
-        lastEmitter = yoshi.child;
-        lastEvent = event;
-        lastListener = listener;
-      });
+      const captured = captureListenerEvent(yoshi, 'newChildListener');
 
       const f = () => {};
       ee1.on('bar', f);
-      assert.equal(lastEmitter, ee1);
-      assert.equal(lastEvent, 'bar');
-      assert.equal(lastListener, f);
+      assert.equal(captured.emitter, ee1);
+      assert.equal(captured.event, 'bar');
+      assert.equal(captured.listener, f);
     });
   });
 
@@ -207,7 +225,7 @@ describe('Listener for `newChildListener` event', () => {
       const yoshi = new EventYoshi().add(ee1);
       const f = spy();
       yoshi.on('newChildListener', f);
-      yoshi.removeAllListeners('newChildListener', f);
+      yoshi.removeAllListeners('newChildListener');
       yoshi.on('nothing', () => {});
       assert.ok(f.notCalled);
     });
@@ -219,20 +237,14 @@ describe('Listen for `removeListener` event', () => {
     it('Calls listener', () => {
       const ee1 = new EventEmitter();
       const yoshi = new EventYoshi().add(ee1);
-
-      let lastEmitter, lastEvent, lastListener;
-      yoshi.on('removeListener', (event, listener) => {
-        lastEmitter = yoshi.child;
-        lastEvent = event;
-        lastListener = listener;
-      });
+      const captured = captureListenerEvent(yoshi, 'removeListener');
 
       const f = () => {};
       yoshi.on('what', f);
       yoshi.off('what', f);
-      assert.equal(lastEmitter, yoshi);
-      assert.equal(lastEvent, 'what');
-      assert.equal(lastListener, f);
+      assert.equal(captured.emitter, yoshi);
+      assert.equal(captured.event, 'what');
+      assert.equal(captured.listener, f);
     });
   });
 
@@ -268,20 +280,14 @@ describe('Listener for `removeChildListener` event', () => {
       const ee1 = new EventEmitter();
       const ee2 = new EventEmitter();
       const yoshi = new EventYoshi().add(ee1).add(ee2);
-
-      let lastEmitter, lastEvent, lastListener;
-      yoshi.on('removeChildListener', (event, listener) => {
-        lastEmitter = yoshi.child;
-        lastEvent = event;
-        lastListener = listener;
-      });
+      const captured = captureListenerEvent(yoshi, 'removeChildListener');
 
       const f = () => {};
       ee1.on('bar', f);
       ee1.removeListener('bar', f);
-      assert.equal(lastEmitter, ee1);
-      assert.equal(lastEvent, 'bar');
-      assert.equal(lastListener, f);
+      assert.equal(captured.emitter, ee1);
+      assert.equal(captured.event, 'bar');
+      assert.equal(captured.listener, f);
     });
   });
 });
@@ -349,31 +355,39 @@ describe('Listen for an event more than once', () => {
     yoshi.on('foo', () => {});
     yoshi.on('foo', b);
     yoshi.removeListener('foo', b);
-    yoshi.on('foo', done);
+    yoshi.on('foo', () => done());
     yoshi.emit('foo');
   });
 });
 
 describe('Proxy a custom function', () => {
   it('Calls proxied child functions', () => {
-    const ee1 = new EventEmitter();
-    const ee2 = new EventEmitter();
-    const yoshi = new EventYoshi().add(ee1).add(ee2);
+    interface CustomEE extends EventEmitter {
+      foo?: (a?: number, b?: number) => string;
+      bar?: (a: string) => string;
+    }
+    const ee1 = new EventEmitter() as CustomEE;
+    const ee2 = new EventEmitter() as CustomEE;
+    const yoshi = new EventYoshi().add(ee1).add(ee2) as EventYoshi & {
+      foo: (...args: unknown[]) => unknown;
+      bar: (...args: unknown[]) => unknown;
+    };
 
     yoshi.proxy('foo', 'bar');
 
-    let ee1foo, ee2foo;
+    let ee1foo: boolean | undefined;
+    let ee2foo: number | undefined;
     ee1.foo = () => {
       ee1foo = true;
       return 'a';
     };
 
-    ee2.foo = (a, b) => {
+    ee2.foo = (a = 0, b = 0) => {
       ee2foo = a + b;
       return 'b';
     };
 
-    ee2.bar = (a) => {
+    ee2.bar = (a: string) => {
       return a;
     };
 
@@ -450,5 +464,19 @@ describe('Use `EventEmitter#prependOnceListener()`', () => {
     assert.ok(a.called);
     assert.ok(b.called);
     assert.ok(a.calledBefore(b));
+  });
+});
+
+describe('Module exports interop', () => {
+  it('exports EventYoshi and default aliases', () => {
+    assert.strictEqual(typeof EventYoshi, 'function');
+    assert.strictEqual(
+      (EventYoshi as unknown as Record<string, unknown>).default,
+      EventYoshi,
+    );
+    assert.strictEqual(
+      (EventYoshi as unknown as Record<string, unknown>).EventYoshi,
+      EventYoshi,
+    );
   });
 });
